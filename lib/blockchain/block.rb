@@ -1,4 +1,4 @@
-
+require 'json'
 
 module BlockChain
   class Block
@@ -8,7 +8,7 @@ module BlockChain
     attr_reader :index, :previous_hash, :timestamp, :data, :hash
 
     validates :index, :previous_hash, :timestamp, :hash, presence: true
-    validates :index, numericality: {only_integer: true}
+    validates :index, numericality: { only_integer: true }
 
     def initialize(index:, previous_hash:, timestamp:, data:, hash:)
       @index = index
@@ -20,12 +20,16 @@ module BlockChain
 
     def as_json
       {
-        index: index,
-        previous_hash: previous_hash,
-        timestamp: timestamp,
-        data: data,
-        hash: hash,
+        'index' => index,
+        'previous_hash' => previous_hash,
+        'timestamp' => timestamp,
+        'data' => data,
+        'hash' => hash,
       }
+    end
+
+    def to_json
+      JSON.generate(as_json)
     end
 
     def to_hash_prams
@@ -37,7 +41,7 @@ module BlockChain
       }
     end
 
-    def valid_as_next?(block)
+    def valid_as_next!(block)
       case
         when block.index != index + 1
           raise InvalidIndex
@@ -47,6 +51,17 @@ module BlockChain
           raise InvalidHash
         else
           true
+      end
+    end
+
+    def ==(block)
+      case block
+        when Block
+          as_json == block.as_json
+        when Hash
+          as_json == block
+        else
+          super
       end
     end
 

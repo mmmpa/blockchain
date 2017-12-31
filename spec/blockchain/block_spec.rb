@@ -5,7 +5,7 @@ RSpec.describe BlockChain::Block do
     include BlockChain::HashCalculation
   end
 
-  let(:hasher) {Hasher.new}
+  let(:hasher) { Hasher.new }
   let(:p1) {
     {
       index: 1,
@@ -15,8 +15,7 @@ RSpec.describe BlockChain::Block do
     }
   }
 
-  let(:first) {BlockChain::Block.new(**p1, hash: hasher.to_calculated_hash(p1))
-  }
+  let(:first) { BlockChain::Block.new(**p1, hash: hasher.to_calculated_hash(p1)) }
 
   let(:p2) {
     {
@@ -27,26 +26,41 @@ RSpec.describe BlockChain::Block do
     }
   }
 
-  let(:second) {BlockChain::Block.new(**p2, hash: hasher.to_calculated_hash(p2))}
+  let(:second) { BlockChain::Block.new(**p2, hash: hasher.to_calculated_hash(p2)) }
 
-  it do
-    expect(first.valid_as_next?(second)).to eq(true)
+  describe '#valid_as_next!' do
+    it do
+      expect(first.valid_as_next!(second)).to eq(true)
+    end
+
+    it do
+      p3 = p2.merge(index: 3)
+      second = BlockChain::Block.new(**p3, hash: hasher.to_calculated_hash(p3))
+      expect { first.valid_as_next!(second) }.to raise_error(BlockChain::Block::InvalidIndex)
+    end
+
+    it do
+      p3 = p2.merge(previous_hash: 'invalid')
+      second = BlockChain::Block.new(**p3, hash: hasher.to_calculated_hash(p3))
+      expect { first.valid_as_next!(second) }.to raise_error(BlockChain::Block::InvalidPreviousHash)
+    end
+
+    it do
+      second = BlockChain::Block.new(**p2, hash: 'invalid')
+      expect { first.valid_as_next!(second) }.to raise_error(BlockChain::Block::InvalidHash)
+    end
   end
 
-  it do
-    p3 = p2.merge(index: 3)
-    second = BlockChain::Block.new(**p3, hash: hasher.to_calculated_hash(p3))
-    expect{first.valid_as_next?(second)}.to raise_error(BlockChain::Block::InvalidIndex)
-  end
+  describe 'eq' do
+    it do
+      expect(first == JSON.parse(first.to_json)).to eq(true)
+    end
 
-  it do
-    p3 = p2.merge(previous_hash: 'invalid')
-    second = BlockChain::Block.new(**p3, hash: hasher.to_calculated_hash(p3))
-    expect{first.valid_as_next?(second)}.to raise_error(BlockChain::Block::InvalidPreviousHash)
-  end
+    it do
+      first = BlockChain::Block.new(**p1, hash: hasher.to_calculated_hash(p1))
+      second = BlockChain::Block.new(**p1, hash: hasher.to_calculated_hash(p1))
 
-  it do
-    second = BlockChain::Block.new(**p2, hash: 'invalid')
-    expect{first.valid_as_next?(second)}.to raise_error(BlockChain::Block::InvalidHash)
+      expect(first == second).to eq(true)
+    end
   end
 end
