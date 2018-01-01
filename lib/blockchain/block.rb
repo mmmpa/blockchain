@@ -18,7 +18,7 @@ module BlockChain
       @hash = hash
     end
 
-    def as_json
+    def as_json(*)
       {
         'index' => index,
         'previous_hash' => previous_hash,
@@ -28,7 +28,7 @@ module BlockChain
       }
     end
 
-    def to_json
+    def to_json(*)
       JSON.generate(as_json)
     end
 

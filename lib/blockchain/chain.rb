@@ -30,11 +30,11 @@ module BlockChain
       validate_body!
     end
 
-    def as_json
+    def as_json(*)
       { 'body' => body.map(&:as_json) }
     end
 
-    def to_json
+    def to_json(*)
       JSON.generate(as_json)
     end
 
@@ -47,6 +47,12 @@ module BlockChain
       }
 
       body.push(Block.new(**params, hash: to_calculated_hash(params)))
+    end
+
+    def add_block(params)
+      block = Block.new(params)
+      last_block.valid_as_next!(block)
+      body.push(block)
     end
 
     # - 長さのチェック (自分より長くなければ却下)
