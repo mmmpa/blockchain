@@ -31,8 +31,9 @@ module BlockChain
 
     # 新しいデータ登録を行う。
     # 自分のチェインにブロックを登録し、peers に登録されたことを通知する
-    def add(data)
-      chain.add(data)
+    def add(transaction)
+      t = Transaction.new(transaction)
+      chain.add(t)
       broadcast(type: Message::RESPONSE_BLOCKCHAIN, message: [last_block])
     end
 

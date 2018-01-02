@@ -5,13 +5,20 @@ RSpec.describe BlockChain::Block do
     include BlockChain::HashCalculation
   end
 
+  class Power
+    include BlockChain::PowCalculation
+  end
+
   let(:hasher) { Hasher.new }
+  let(:power) { Power.new }
+
   let(:p1) {
     {
       index: 1,
       previous_hash: '0',
       timestamp: Time.now.to_i,
-      data: 'data',
+      data: [create_transaction],
+      proof: 1,
     }
   }
 
@@ -22,7 +29,8 @@ RSpec.describe BlockChain::Block do
       index: 2,
       previous_hash: first.hash,
       timestamp: Time.now.to_i,
-      data: 'data',
+      data: [create_transaction],
+      proof: power.proof_of_work(previous: 1),
     }
   }
 
@@ -48,6 +56,12 @@ RSpec.describe BlockChain::Block do
     it do
       second = BlockChain::Block.new(**p2, hash: 'invalid')
       expect { first.valid_as_next!(second) }.to raise_error(BlockChain::Block::InvalidHash)
+    end
+
+    it do
+      p3 = p2.merge(proof: 'invalid')
+      second = BlockChain::Block.new(**p3, hash: hasher.to_calculated_hash(p3))
+      expect { first.valid_as_next!(second) }.to raise_error(BlockChain::Block::InvalidPow)
     end
   end
 

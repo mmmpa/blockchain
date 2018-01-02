@@ -2,11 +2,13 @@ module BlockChain
   class Chain
     include ActiveModel::Validations
     include HashCalculation
+    include PowCalculation
 
     attr_reader :body
 
     class << self
       include HashCalculation
+      include PowCalculation
 
       def genesis_block
         Block.new(
@@ -15,6 +17,7 @@ module BlockChain
           timestamp: 1_514_752_944,
           data: 'genesis block',
           hash: 'b1c4763ce5e60659e3063d6f7d37af8a8259a148ce8e3c9b631dbe96f2414362',
+          proof: 1000,
         )
       end
     end
@@ -43,6 +46,7 @@ module BlockChain
         index: last_block.index + 1,
         previous_hash: last_block.hash,
         timestamp: Time.now.to_i,
+        proof: to_pow(last_block.proof),
         data: data,
       }
 

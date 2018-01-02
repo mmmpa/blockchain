@@ -52,6 +52,7 @@ RSpec.describe BlockChain::Chain do
         previous_hash: '0',
         timestamp: Time.now.to_i,
         data: 'another genesis block',
+        proof: 1,
       }
 
       b.body[0] = BlockChain::Block.new(**pa, hash: b.to_calculated_hash(pa))
@@ -83,6 +84,15 @@ RSpec.describe BlockChain::Chain do
       another_chain.add('new another data 1')
       another_chain.add('new another data 2')
       another_body_params[1]['data'] = 'invalid'
+      expect { new_chain.replace!(another_body_params) }.
+        to raise_error(BlockChain::Chain::InvalidBlockInclusion)
+    end
+
+    it do
+      new_chain.add('new another data 1')
+      another_chain.add('new another data 1')
+      another_chain.add('new another data 2')
+      another_body_params[1]['proof'] = 'invalid'
       expect { new_chain.replace!(another_body_params) }.
         to raise_error(BlockChain::Chain::InvalidBlockInclusion)
     end

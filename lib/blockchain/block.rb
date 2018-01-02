@@ -4,18 +4,20 @@ module BlockChain
   class Block
     include ActiveModel::Validations
     include HashCalculation
+    include PowCalculation
 
-    attr_reader :index, :previous_hash, :timestamp, :data, :hash
+    attr_reader :index, :previous_hash, :timestamp, :data, :hash, :proof
 
     validates :index, :previous_hash, :timestamp, :hash, presence: true
     validates :index, numericality: { only_integer: true }
 
-    def initialize(index:, previous_hash:, timestamp:, data:, hash:)
+    def initialize(index:, previous_hash:, timestamp:, data:, hash:, proof:)
       @index = index
       @previous_hash = previous_hash
       @timestamp = timestamp
-      @data = data
+      @data = JSON.parse(data.to_json)
       @hash = hash
+      @proof = proof
     end
 
     def as_json(*)
@@ -25,6 +27,7 @@ module BlockChain
         'timestamp' => timestamp,
         'data' => data,
         'hash' => hash,
+        'proof' => proof,
       }
     end
 
@@ -38,6 +41,7 @@ module BlockChain
         previous_hash: previous_hash,
         timestamp: timestamp,
         data: data,
+        proof: proof,
       }
     end
 
@@ -49,20 +53,15 @@ module BlockChain
         raise InvalidPreviousHash
       when to_calculated_hash(block.to_hash_prams) != block.hash
         raise InvalidHash
+      when !valid_proof?(previous: proof, mine: block.proof)
+        raise InvalidPow
       else
         true
       end
     end
 
     def ==(other)
-      case other
-      when Block
-        as_json == other.as_json
-      when Hash
-        as_json == other
-      else
-        super
-      end
+      to_json == other.to_json
     end
 
     class InvalidIndex < StandardError
@@ -72,6 +71,9 @@ module BlockChain
     end
 
     class InvalidHash < StandardError
+    end
+
+    class InvalidPow < StandardError
     end
   end
 end
