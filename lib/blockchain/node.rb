@@ -42,14 +42,14 @@ module BlockChain
 
     def receive(type:, message: nil)
       case type
-        when Message::QUERY_LATEST
-          broadcast(type: Message::RESPONSE_BLOCKCHAIN, message: [last_block])
-        when Message::QUERY_ALL
-          broadcast(type: Message::RESPONSE_BLOCKCHAIN, message: blocks)
-        when Message::RESPONSE_BLOCKCHAIN
-          decide(JSON.parse(message))
-        else
-          raise UnknownMessageType
+      when Message::QUERY_LATEST
+        broadcast(type: Message::RESPONSE_BLOCKCHAIN, message: [last_block])
+      when Message::QUERY_ALL
+        broadcast(type: Message::RESPONSE_BLOCKCHAIN, message: blocks)
+      when Message::RESPONSE_BLOCKCHAIN
+        decide(JSON.parse(message))
+      else
+        raise UnknownMessageType
       end
     end
 
@@ -58,19 +58,19 @@ module BlockChain
       last_received_block = received_blocks[-1]
 
       case
-        when last_received_block['index'] <= last_block.index
-          # index が最後のブロックの index を超えていないので更新しない
-          puts 'Not new block.'
-        when last_received_block['previous_hash'] == last_block.hash
-          # 次にくるブロックなので追加する
-          chain.add_block(last_received_block.symbolize_keys!)
-          broadcast(type: Message::RESPONSE_BLOCKCHAIN, message: [last_received_block])
-        when received_blocks.size == 1
-          # あたらしい last ブロックのみが来たが間が欠けているのですべての blocks を要求する
-          broadcast(type: Message::QUERY_ALL)
-        else
-          # 自分より長いフルセットのブロックチェインが届いたので置換を試みる
-          chain.replace!(received_blocks)
+      when last_received_block['index'] <= last_block.index
+        # index が最後のブロックの index を超えていないので更新しない
+        puts 'Not new block.'
+      when last_received_block['previous_hash'] == last_block.hash
+        # 次にくるブロックなので追加する
+        chain.add_block(last_received_block.symbolize_keys!)
+        broadcast(type: Message::RESPONSE_BLOCKCHAIN, message: [last_received_block])
+      when received_blocks.size == 1
+        # あたらしい last ブロックのみが来たが間が欠けているのですべての blocks を要求する
+        broadcast(type: Message::QUERY_ALL)
+      else
+        # 自分より長いフルセットのブロックチェインが届いたので置換を試みる
+        chain.replace!(received_blocks)
       end
     rescue => e
       puts e

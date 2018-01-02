@@ -12,7 +12,7 @@ module BlockChain
         Block.new(
           index: 0,
           previous_hash: '0',
-          timestamp: 1514752944,
+          timestamp: 1_514_752_944,
           data: 'genesis block',
           hash: 'b1c4763ce5e60659e3063d6f7d37af8a8259a148ce8e3c9b631dbe96f2414362',
         )

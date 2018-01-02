@@ -43,25 +43,25 @@ module BlockChain
 
     def valid_as_next!(block)
       case
-        when block.index != index + 1
-          raise InvalidIndex
-        when block.previous_hash != hash
-          raise InvalidPreviousHash
-        when to_calculated_hash(block.to_hash_prams) != block.hash
-          raise InvalidHash
-        else
-          true
+      when block.index != index + 1
+        raise InvalidIndex
+      when block.previous_hash != hash
+        raise InvalidPreviousHash
+      when to_calculated_hash(block.to_hash_prams) != block.hash
+        raise InvalidHash
+      else
+        true
       end
     end
 
-    def ==(block)
-      case block
-        when Block
-          as_json == block.as_json
-        when Hash
-          as_json == block
-        else
-          super
+    def ==(other)
+      case other
+      when Block
+        as_json == other.as_json
+      when Hash
+        as_json == other
+      else
+        super
       end
     end
 

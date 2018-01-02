@@ -67,11 +67,11 @@ RSpec.describe BlockChain::Node do
 
     it '', type: :invalid_sync do
       invalid_params = JSON.parse(node1.chain.body[1].to_json).
-        symbolize_keys!.
-        merge!(
-          data: 'invalid',
-          hash: node1.chain.body[1].hash,
-        )
+                         symbolize_keys!.
+                         merge!(
+                           data: 'invalid',
+                           hash: node1.chain.body[1].hash,
+                         )
       node1.chain.body[1] = BlockChain::Block.new(invalid_params)
       node1.add('data 4')
 
